@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#08080a">
+    <title>Shwe Kyawl</title>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="stylesheet" href="TemplateData/style.css">
+    <link rel="manifest" href="manifest.webmanifest">
+
+    <!-- Minimalist Casino Loading Screen -->
+    <style>
+      :root {
+        --bg-deep:      #08080a;
+        --bg-vignette:  #131110;
+        --gold:         #d4af37;
+        --gold-soft:    #c9a961;
+        --gold-dim:     rgba(212, 175, 55, 0.16);
+        --ink:          #f1ede2;
+        --ink-muted:    rgba(241, 237, 226, 0.42);
+        --safe-t: env(safe-area-inset-top, 0px);
+        --safe-b: env(safe-area-inset-bottom, 0px);
+        --safe-l: env(safe-area-inset-left, 0px);
+        --safe-r: env(safe-area-inset-right, 0px);
+      }
+
+      * { box-sizing: border-box; }
+
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overscroll-behavior: none;
+      }
+
+      body {
+        background: radial-gradient(120% 140% at 50% 38%, var(--bg-vignette) 0%, var(--bg-deep) 62%) !important;
+        overflow: hidden;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      #unity-container {
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
+        height: 100dvh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: transparent !important;
+        padding: var(--safe-t) var(--safe-r) var(--safe-b) var(--safe-l);
+      }
+
+      #unity-canvas {
+        width: 100%;
+        height: 100%;
+        background: transparent !important;
+        outline: none;
+      }
+
+      /* ---------- Loading composition ---------- */
+      #unity-loading-bar {
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: clamp(18px, 3.4vh, 30px);
+        background: transparent;
+        padding: 24px;
+        width: min(84vw, 360px);
+      }
+
+      /* Brand mark: the actual game logo, held quiet with a slow gold breathe
+         rather than dressed up with extra ornament. */
+      #unity-logo {
+        position: relative;
+        width: clamp(88px, 22vw, 140px);
+        height: clamp(88px, 22vw, 140px);
+        background-image: url("TemplateData/unity-logo-light.png");
+        background-size: contain;
+        background-position: center;
+        background-repeat: no-repeat;
+        filter: drop-shadow(0 0 18px rgba(212, 175, 55, 0.22));
+        animation: logoBreathe 3.2s ease-in-out infinite;
+      }
+
+      @keyframes logoBreathe {
+        0%, 100% { filter: drop-shadow(0 0 14px rgba(212, 175, 55, 0.16)); }
+        50%      { filter: drop-shadow(0 0 24px rgba(212, 175, 55, 0.34)); }
+      }
+
+      .brand {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: clamp(6px, 1.4vh, 10px);
+      }
+
+      .brand-mark {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(15px, 3.6vw, 19px);
+        letter-spacing: clamp(4px, 1.6vw, 7px);
+        color: var(--ink);
+        text-transform: uppercase;
+        opacity: 0.92;
+      }
+
+      .brand-status {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(9px, 2.2vw, 11px);
+        letter-spacing: clamp(3px, 1.2vw, 5px);
+        color: var(--gold-soft);
+        text-transform: uppercase;
+      }
+
+      .brand-status::after {
+        display: inline-block;
+        width: 1.4em;
+        text-align: left;
+        content: "";
+        animation: dots 1.6s steps(4, end) infinite;
+      }
+
+      @keyframes dots {
+        0%   { content: ""; }
+        25%  { content: "."; }
+        50%  { content: ".."; }
+        75%  { content: "..."; }
+        100% { content: ""; }
+      }
+
+      /* Progress bar */
+      #unity-progress-bar-empty {
+        width: 100%;
+        max-width: 300px;
+        height: 2px;
+        background: rgba(255, 255, 255, 0.07) !important;
+        background-image: none !important;
+        border: none !important;
+        margin: 0;
+        padding: 0;
+        border-radius: 2px;
+        overflow: hidden;
+        position: relative;
+      }
+
+      #unity-progress-bar-full {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 0%;
+        height: 100%;
+        background: var(--gold) !important;
+        background-image: none !important;
+        border: none !important;
+        margin: 0;
+        padding: 0;
+        border-radius: 2px;
+        box-shadow: 0 0 12px rgba(212, 175, 55, 0.75), 0 0 3px rgba(212, 175, 55, 0.9);
+        transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      #unity-warning {
+        position: fixed;
+        top: calc(var(--safe-t) + 12px);
+        left: 50%;
+        transform: translateX(-50%);
+        width: min(92vw, 480px);
+        z-index: 10;
+        font-family: Georgia, serif;
+        font-size: 13px;
+      }
+
+      #unity-warning:empty { display: none; }
+
+      /* ---------- Responsive tuning ---------- */
+
+      /* Small phones */
+      @media (max-width: 380px) {
+        #unity-loading-bar { gap: 16px; padding: 16px; }
+        #unity-logo { width: 72px; height: 72px; }
+      }
+
+      /* Short / landscape viewports (phones rotated, small laptops in a browser strip) */
+      @media (max-height: 520px) {
+        #unity-loading-bar { gap: 10px; }
+        #unity-logo { width: clamp(52px, 12vh, 80px); height: clamp(52px, 12vh, 80px); }
+        .brand-mark { font-size: clamp(12px, 2.6vh, 16px); letter-spacing: clamp(3px, 1vh, 5px); }
+        .brand-status { font-size: clamp(8px, 1.6vh, 10px); }
+      }
+
+      /* Large / desktop displays: keep the mark modest, casinos favor restraint */
+      @media (min-width: 1200px) {
+        #unity-loading-bar { width: 340px; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        #unity-logo { animation: none; filter: drop-shadow(0 0 16px rgba(212, 175, 55, 0.2)); }
+        .brand-status::after { animation: none; content: "…"; }
+        #unity-progress-bar-full { transition: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="unity-container">
+      <canvas id="unity-canvas" width="2120" height="1080" tabindex="-1"></canvas>
+      <div id="unity-loading-bar">
+        <div id="unity-logo"></div>
+        <div class="brand">
+          <div class="brand-mark">Shwe Kyawl</div>
+          <div class="brand-status">Loading</div>
+        </div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
+        </div>
+      </div>
+      <div id="unity-warning"></div>
+    </div>
+    <script>
+      window.addEventListener("load", function () {
+        if ("serviceWorker" in navigator) {
+          navigator.serviceWorker.register("ServiceWorker.js");
+          var refreshing = false;
+          navigator.serviceWorker.addEventListener("controllerchange", function () {
+            if (refreshing) return;
+            refreshing = true;
+            window.location.reload();
+          });
+        }
+      });
+
+      var container = document.querySelector("#unity-container");
+      var canvas = document.querySelector("#unity-canvas");
+      var loadingBar = document.querySelector("#unity-loading-bar");
+      var progressBarFull = document.querySelector("#unity-progress-bar-full");
+      var warningBanner = document.querySelector("#unity-warning");
+
+      function unityShowBanner(msg, type) {
+        function updateBannerVisibility() {
+          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+        }
+        var div = document.createElement('div');
+        div.innerHTML = msg;
+        warningBanner.appendChild(div);
+        if (type == 'error') div.style = 'background: #3a1414; color: #f1ede2; border: 1px solid #7a2b2b; padding: 10px 14px; border-radius: 4px; margin-bottom: 8px;';
+        else {
+          if (type == 'warning') div.style = 'background: #3a3114; color: #f1ede2; border: 1px solid #7a662b; padding: 10px 14px; border-radius: 4px; margin-bottom: 8px;';
+          setTimeout(function() {
+            warningBanner.removeChild(div);
+            updateBannerVisibility();
+          }, 5000);
+        }
+        updateBannerVisibility();
+      }
+
+      var buildUrl = "Build";
+      var loaderUrl = buildUrl + "/a03625047698beafb5e48c9db74d2f38.loader.js";
+      var config = {
+        dataUrl: buildUrl + "/307a9b90ed04cdc371f8c5f5ff9fd22e.data.br",
+        frameworkUrl: buildUrl + "/2b5f63b7b116fde5af0a0037305da46e.framework.js.br",
+        codeUrl: buildUrl + "/b619e3b7928ffb4d10ac89ecdac4dda4.wasm.br",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "DefaultCompany",
+        productName: "WebSlots",
+        productVersion: "1.0",
+        showBanner: unityShowBanner,
+      };
+
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        var meta = document.createElement('meta');
+        meta.name = 'viewport';
+        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes, viewport-fit=cover';
+        document.getElementsByTagName('head')[0].appendChild(meta);
+      }
+
+      loadingBar.style.display = "flex";
+
+      var script = document.createElement("script");
+      script.src = loaderUrl;
+      script.onload = () => {
+        createUnityInstance(canvas, config, (progress) => {
+          progressBarFull.style.width = 100 * progress + "%";
+        }).then((unityInstance) => {
+          loadingBar.style.display = "none";
+        }).catch((message) => {
+          alert(message);
+        });
+      };
+      document.body.appendChild(script);
+    </script>
+  </body>
+</html>
