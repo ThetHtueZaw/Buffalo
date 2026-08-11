@@ -1,9 +1,9 @@
 const cacheName = "DefaultCompany-Shwe Kyawl-1.0";
 const contentToCache = [
-    "Build/e0845394379a85f1171541048c5f21d8.loader.js",
+    "Build/560a6d0327b7384c075b0187fac16866.loader.js",
     "Build/7f2f0b80361fd2fab1930382888087ef.framework.js.br",
-    "Build/3848932f00b819d7f5231e8fd465d7ae.data.br",
-    "Build/e65ee02bd566b330c414436b49b12d10.wasm.br",
+    "Build/4dbe5e3090e46d5c9152c157b03f6503.data.br",
+    "Build/7d0abec18e94c3c7b69120387eb7588f.wasm.br",
     "TemplateData/style.css"
 
 ];
