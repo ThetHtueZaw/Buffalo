@@ -1,2 +1,0 @@
-# Optimization Test
-optimization test
